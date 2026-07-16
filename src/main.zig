@@ -13,8 +13,12 @@ pub fn main(init: std.process.Init) !void {
     var stdout_writer = stdout_file.writer(io, &stdout_buf);
     const stdout = &stdout_writer.interface;
 
+    var cwd_buf: [std.Io.Dir.max_path_bytes]u8 = undefined;
+
     while (true) {
-        try stdout.writeAll("> ");
+        const cwd_len = try std.process.currentPath(io, &cwd_buf);
+        const cwd = cwd_buf[0..cwd_len];
+        try stdout.print("{s}> ", .{cwd});
         try stdout.flush();
 
         const bare_line = try stdin.takeDelimiter('\n');
