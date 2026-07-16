@@ -21,7 +21,17 @@ pub fn main(init: std.process.Init) !void {
         const line = bare_line orelse break;
         const clean_line = std.mem.trim(u8, line, "\r");
 
-        try stdout.print("{s}\n", .{clean_line});
+        if (clean_line.len == 0) continue;
+
+        var it = std.mem.tokenizeAny(u8, clean_line, " \t");
+        const cmd = it.next() orelse continue;
+
+        try stdout.print("cmd: {s}\n", .{cmd});
         try stdout.flush();
+
+        while (it.next()) |arg| {
+            try stdout.print("  arg: {s}\n", .{arg});
+            try stdout.flush();
+        }
     }
 }
