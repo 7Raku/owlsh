@@ -33,5 +33,26 @@ pub fn main(init: std.process.Init) !void {
         if (std.mem.eql(u8, cmd, "exit")) {
             break;
         }
+
+        if (std.mem.eql(u8, cmd, "cd")) {
+            const target = it.next() orelse {
+                try stdout.print("cd: missing argument\n", .{});
+                try stdout.flush();
+                continue;
+            };
+
+            var dir = std.Io.Dir.cwd().openDir(io, target, .{}) catch |err| {
+                try stdout.print("cd: {s}: {s}\n", .{ target, @errorName(err) });
+                try stdout.flush();
+                continue;
+            };
+            defer dir.close(io);
+
+            std.process.setCurrentDir(io, dir) catch |err| {
+                try stdout.print("cd: {s}: {s}\n", .{ target, @errorName(err) });
+                try stdout.flush();
+                continue;
+            };
+        }
     }
 }
