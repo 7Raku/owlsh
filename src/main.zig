@@ -30,12 +30,8 @@ pub fn main(init: std.process.Init) !void {
         var it = std.mem.tokenizeAny(u8, clean_line, " \t");
         const cmd = it.next() orelse continue;
 
-        try stdout.print("cmd: {s}\n", .{cmd});
-        try stdout.flush();
-
-        while (it.next()) |arg| {
-            try stdout.print("  arg: {s}\n", .{arg});
-            try stdout.flush();
+        if (std.mem.eql(u8, cmd, "exit")) {
+            break;
         }
     }
 }
