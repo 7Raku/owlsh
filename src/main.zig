@@ -1,4 +1,5 @@
 const std = @import("std");
+const builtins = @import("builtins/mod.zig");
 
 pub fn main(init: std.process.Init) !void {
     const io = init.io;
@@ -40,31 +41,10 @@ pub fn main(init: std.process.Init) !void {
         if (argv.items.len == 0) continue;
         const cmd = argv.items[0];
 
-        if (std.mem.eql(u8, cmd, "exit")) {
-            break;
-        }
-
-        if (std.mem.eql(u8, cmd, "cd")) {
-            if (argv.items.len < 2) {
-                try stdout.print("cd: missing argument\n", .{});
-                try stdout.flush();
-                continue;
-            }
-            const target = argv.items[1];
-
-            var dir = std.Io.Dir.cwd().openDir(io, target, .{}) catch |err| {
-                try stdout.print("cd: {s}: {s}\n", .{ target, @errorName(err) });
-                try stdout.flush();
-                continue;
-            };
-            defer dir.close(io);
-
-            std.process.setCurrentDir(io, dir) catch |err| {
-                try stdout.print("cd: {s}: {s}\n", .{ target, @errorName(err) });
-                try stdout.flush();
-                continue;
-            };
-            continue;
+        switch (try builtins.dispatch(cmd, argv.items, io, stdout)) {
+            .exit_shell => break,
+            .handled => continue,
+            .not_builtin => {},
         }
 
         var proc = std.process.spawn(io, .{
