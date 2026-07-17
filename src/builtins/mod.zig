@@ -1,6 +1,7 @@
 const std = @import("std");
 const cd = @import("cd.zig");
 const exit = @import("exit.zig");
+const clear = @import("clear.zig");
 
 pub const Result = enum {
     not_builtin,
@@ -20,6 +21,10 @@ pub fn dispatch(
     }
     if (std.mem.eql(u8, cmd, "cd")) {
         try cd.run(io, argv, stdout);
+        return .handled;
+    }
+    if (std.mem.eql(u8, cmd, "clear")) {
+        try clear.run(stdout);
         return .handled;
     }
     return .not_builtin;
