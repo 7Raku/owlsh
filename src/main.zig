@@ -4,6 +4,7 @@ const builtins = @import("builtins/mod.zig");
 pub fn main(init: std.process.Init) !void {
     const io = init.io;
     const gpa = init.gpa;
+    const home = init.environ_map.get("USERPROFILE");
 
     var stdin_buf: [1024]u8 = undefined;
     var stdin_file = std.Io.File.stdin();
@@ -20,7 +21,18 @@ pub fn main(init: std.process.Init) !void {
     while (true) {
         const cwd_len = try std.process.currentPath(io, &cwd_buf);
         const cwd = cwd_buf[0..cwd_len];
-        try stdout.print("{s}> ", .{cwd});
+
+        if (home) |h| {
+            if (std.mem.eql(u8, cwd, h)) {
+                try stdout.print("~> ", .{});
+            } else if (std.mem.startsWith(u8, cwd, h) and cwd.len > h.len and cwd[h.len] == '\\') {
+                try stdout.print("~{s}> ", .{cwd[h.len..]});
+            } else {
+                try stdout.print("{s}> ", .{cwd});
+            }
+        } else {
+            try stdout.print("{s}> ", .{cwd});
+        }
         try stdout.flush();
 
         const bare_line = try stdin.takeDelimiter('\n');
