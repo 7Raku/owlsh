@@ -1,6 +1,7 @@
 const std = @import("std");
 const builtin = @import("builtin");
 const builtins = @import("builtins/mod.zig");
+const tokenizer = @import("tokenizer.zig");
 
 extern "kernel32" fn SetConsoleOutputCP(wCodePageID: std.os.windows.UINT) callconv(.winapi) std.os.windows.BOOL;
 
@@ -26,8 +27,17 @@ pub fn main(init: std.process.Init) !void {
     const stdout = &stdout_writer.interface;
 
     var cwd_buf: [std.Io.Dir.max_path_bytes]u8 = undefined;
+    var first_prompt = true;
+    var skip_spacing = false;
 
     while (true) {
+        if (first_prompt) {
+            first_prompt = false;
+        } else if (!skip_spacing) {
+            try stdout.print("\n", .{});
+        }
+        skip_spacing = false;
+
         const cwd_len = try std.process.currentPath(io, &cwd_buf);
         const cwd = cwd_buf[0..cwd_len];
 
@@ -51,26 +61,30 @@ pub fn main(init: std.process.Init) !void {
 
         if (clean_line.len == 0) continue;
 
-        var it = std.mem.tokenizeAny(u8, clean_line, " \t");
-
-        var argv: std.ArrayList([]const u8) = .empty;
-        defer argv.deinit(gpa);
-
-        while (it.next()) |token| {
-            try argv.append(gpa, token);
+        const argv = tokenizer.tokenize(gpa, clean_line) catch |err| {
+            try stdout.print("parse error: {s}\n", .{@errorName(err)});
+            try stdout.flush();
+            continue;
+        };
+        defer {
+            for (argv) |token| gpa.free(token);
+            gpa.free(argv);
         }
 
-        if (argv.items.len == 0) continue;
-        const cmd = argv.items[0];
+        if (argv.len == 0) continue;
+        const cmd = argv[0];
 
-        switch (try builtins.dispatch(cmd, argv.items, io, stdout)) {
+        switch (try builtins.dispatch(cmd, argv, io, stdout)) {
             .exit_shell => break,
-            .handled => continue,
+            .handled => {
+                if (std.mem.eql(u8, cmd, "clear")) skip_spacing = true;
+                continue;
+            },
             .not_builtin => {},
         }
 
         var proc = std.process.spawn(io, .{
-            .argv = argv.items,
+            .argv = argv,
         }) catch |err| {
             try stdout.print("{s}: {s}\n", .{ cmd, @errorName(err) });
             try stdout.flush();
