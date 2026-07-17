@@ -2,6 +2,7 @@ const std = @import("std");
 const cd = @import("cd.zig");
 const exit = @import("exit.zig");
 const clear = @import("clear.zig");
+const pwd = @import("pwd.zig");
 
 pub const CommandType = enum {
     not_builtin,
@@ -25,6 +26,10 @@ pub fn dispatch(
     }
     if (std.mem.eql(u8, cmd, "clear")) {
         try clear.run(stdout);
+        return .handled;
+    }
+    if (std.mem.eql(u8, cmd, "pwd")) {
+        try pwd.run(io, stdout);
         return .handled;
     }
     return .not_builtin;
