@@ -2,7 +2,13 @@ const std = @import("std");
 const builtin = @import("builtin");
 const builtins = @import("builtins/mod.zig");
 
+extern "kernel32" fn SetConsoleOutputCP(wCodePageID: std.os.windows.UINT) callconv(.winapi) std.os.windows.BOOL;
+
 pub fn main(init: std.process.Init) !void {
+    if (builtin.os.tag == .windows) {
+        _ = SetConsoleOutputCP(65001);
+    }
+
     const io = init.io;
     const gpa = init.gpa;
     const home = init.environ_map.get("USERPROFILE");
