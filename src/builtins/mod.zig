@@ -3,7 +3,7 @@ const cd = @import("cd.zig");
 const exit = @import("exit.zig");
 const clear = @import("clear.zig");
 
-pub const Result = enum {
+pub const CommandType = enum {
     not_builtin,
     handled,
     exit_shell,
@@ -14,7 +14,7 @@ pub fn dispatch(
     argv: []const []const u8,
     io: std.Io,
     stdout: *std.Io.Writer,
-) !Result {
+) !CommandType {
     if (std.mem.eql(u8, cmd, "exit")) {
         exit.run();
         return .exit_shell;
