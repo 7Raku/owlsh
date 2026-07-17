@@ -1,10 +1,13 @@
 const std = @import("std");
+const builtin = @import("builtin");
 const builtins = @import("builtins/mod.zig");
 
 pub fn main(init: std.process.Init) !void {
     const io = init.io;
     const gpa = init.gpa;
     const home = init.environ_map.get("USERPROFILE");
+    const username = init.environ_map.get("USERNAME") orelse "user";
+    const hostname = init.environ_map.get("COMPUTERNAME") orelse "host";
 
     var stdin_buf: [1024]u8 = undefined;
     var stdin_file = std.Io.File.stdin();
@@ -24,15 +27,16 @@ pub fn main(init: std.process.Init) !void {
 
         if (home) |h| {
             if (std.mem.eql(u8, cwd, h)) {
-                try stdout.print("~> ", .{});
+                try stdout.print("{s}@{s} ~\n", .{ username, hostname });
             } else if (std.mem.startsWith(u8, cwd, h) and cwd.len > h.len and cwd[h.len] == '\\') {
-                try stdout.print("~{s}> ", .{cwd[h.len..]});
+                try stdout.print("{s}@{s} ~{s}\n", .{ username, hostname, cwd[h.len..] });
             } else {
-                try stdout.print("{s}> ", .{cwd});
+                try stdout.print("{s}@{s} {s}\n", .{ username, hostname, cwd });
             }
         } else {
-            try stdout.print("{s}> ", .{cwd});
+            try stdout.print("{s}@{s} {s}\n", .{ username, hostname, cwd });
         }
+        try stdout.print("➜ ", .{});
         try stdout.flush();
 
         const bare_line = try stdin.takeDelimiter('\n');
