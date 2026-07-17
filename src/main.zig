@@ -2,6 +2,7 @@ const std = @import("std");
 
 pub fn main(init: std.process.Init) !void {
     const io = init.io;
+    const gpa = init.gpa;
 
     var stdin_buf: [1024]u8 = undefined;
     var stdin_file = std.Io.File.stdin();
@@ -28,18 +29,28 @@ pub fn main(init: std.process.Init) !void {
         if (clean_line.len == 0) continue;
 
         var it = std.mem.tokenizeAny(u8, clean_line, " \t");
-        const cmd = it.next() orelse continue;
+
+        var argv: std.ArrayList([]const u8) = .empty;
+        defer argv.deinit(gpa);
+
+        while (it.next()) |token| {
+            try argv.append(gpa, token);
+        }
+
+        if (argv.items.len == 0) continue;
+        const cmd = argv.items[0];
 
         if (std.mem.eql(u8, cmd, "exit")) {
             break;
         }
 
         if (std.mem.eql(u8, cmd, "cd")) {
-            const target = it.next() orelse {
+            if (argv.items.len < 2) {
                 try stdout.print("cd: missing argument\n", .{});
                 try stdout.flush();
                 continue;
-            };
+            }
+            const target = argv.items[1];
 
             var dir = std.Io.Dir.cwd().openDir(io, target, .{}) catch |err| {
                 try stdout.print("cd: {s}: {s}\n", .{ target, @errorName(err) });
@@ -53,6 +64,26 @@ pub fn main(init: std.process.Init) !void {
                 try stdout.flush();
                 continue;
             };
+            continue;
+        }
+
+        var proc = std.process.spawn(io, .{
+            .argv = argv.items,
+        }) catch |err| {
+            try stdout.print("{s}: {s}\n", .{ cmd, @errorName(err) });
+            try stdout.flush();
+            continue;
+        };
+
+        const term = try proc.wait(io);
+        switch (term) {
+            .exited => |code| {
+                if (code != 0) {
+                    try stdout.print("[exit code {d}]\n", .{code});
+                    try stdout.flush();
+                }
+            },
+            else => {},
         }
     }
 }
