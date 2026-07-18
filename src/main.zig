@@ -3,6 +3,7 @@ const builtin = @import("builtin");
 const builtins = @import("builtins/mod.zig");
 const tokenizer = @import("tokenizer.zig");
 const output = @import("output.zig");
+const prompt = @import("prompt.zig");
 
 extern "kernel32" fn SetConsoleOutputCP(wCodePageID: std.os.windows.UINT) callconv(.winapi) std.os.windows.BOOL;
 
@@ -28,7 +29,6 @@ pub fn main(init: std.process.Init) !void {
     var stdout_writer = stdout_file.writer(io, &stdout_buf);
     const stdout = &stdout_writer.interface;
 
-    var cwd_buf: [std.Io.Dir.max_path_bytes]u8 = undefined;
     var first_prompt = true;
     var skip_spacing = false;
 
@@ -40,22 +40,7 @@ pub fn main(init: std.process.Init) !void {
         }
         skip_spacing = false;
 
-        const cwd_len = try std.process.currentPath(io, &cwd_buf);
-        const cwd = cwd_buf[0..cwd_len];
-
-        if (home) |h| {
-            if (std.mem.eql(u8, cwd, h)) {
-                try stdout.print("{s}@{s} ~\n", .{ username, hostname });
-            } else if (std.mem.startsWith(u8, cwd, h) and cwd.len > h.len and cwd[h.len] == '\\') {
-                try stdout.print("{s}@{s} ~{s}\n", .{ username, hostname, cwd[h.len..] });
-            } else {
-                try stdout.print("{s}@{s} {s}\n", .{ username, hostname, cwd });
-            }
-        } else {
-            try stdout.print("{s}@{s} {s}\n", .{ username, hostname, cwd });
-        }
-        try stdout.print("➜ ", .{});
-        try stdout.flush();
+        try prompt.render(io, stdout, username, hostname, home);
 
         const bare_line = try stdin.takeDelimiter('\n');
         const line = bare_line orelse break;
