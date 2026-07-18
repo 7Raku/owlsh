@@ -1,12 +1,7 @@
 const std = @import("std");
 
 pub fn run(io: std.Io, argv: []const []const u8, stdout: *std.Io.Writer, home: ?[]const u8) !void {
-    if (argv.len < 2) {
-        try stdout.print("cd: missing argument\n", .{});
-        try stdout.flush();
-        return;
-    }
-    var target = argv[1];
+    var target: []const u8 = if (argv.len < 2) "~" else argv[1];
     var expanded_buf: [std.Io.Dir.max_path_bytes]u8 = undefined;
 
     if (std.mem.eql(u8, target, "~")) {
