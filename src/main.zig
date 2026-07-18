@@ -15,6 +15,7 @@ pub fn main(init: std.process.Init) !void {
     const home = init.environ_map.get("USERPROFILE");
     const username = init.environ_map.get("USERNAME") orelse "user";
     const hostname = init.environ_map.get("COMPUTERNAME") orelse "host";
+    var prev_dir: builtins.DirHistory = .{};
 
     var stdin_buf: [1024]u8 = undefined;
     var stdin_file = std.Io.File.stdin();
@@ -74,7 +75,7 @@ pub fn main(init: std.process.Init) !void {
         if (argv.len == 0) continue;
         const cmd = argv[0];
 
-        switch (try builtins.dispatch(cmd, argv, io, stdout, home)) {
+        switch (try builtins.dispatch(cmd, argv, io, stdout, home, &prev_dir)) {
             .exit_shell => break,
             .handled => {
                 if (std.mem.eql(u8, cmd, "clear")) skip_spacing = true;

@@ -11,19 +11,15 @@ pub const CommandType = enum {
     exit_shell,
 };
 
-pub fn dispatch(
-    cmd: []const u8,
-    argv: []const []const u8,
-    io: std.Io,
-    stdout: *std.Io.Writer,
-    home: ?[]const u8,
-) !CommandType {
+pub const DirHistory = cd.DirHistory;
+
+pub fn dispatch(cmd: []const u8, argv: []const []const u8, io: std.Io, stdout: *std.Io.Writer, home: ?[]const u8, prev_dir: *DirHistory) !CommandType {
     if (std.mem.eql(u8, cmd, "exit")) {
         exit.run();
         return .exit_shell;
     }
     if (std.mem.eql(u8, cmd, "cd")) {
-        try cd.run(io, argv, stdout, home);
+        try cd.run(io, argv, stdout, home, prev_dir);
         return .handled;
     }
     if (std.mem.eql(u8, cmd, "clear")) {
