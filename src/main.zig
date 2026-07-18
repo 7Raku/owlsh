@@ -4,6 +4,7 @@ const builtins = @import("builtins/mod.zig");
 const tokenizer = @import("tokenizer.zig");
 const output = @import("output.zig");
 const prompt = @import("prompt.zig");
+const banner = @import("banner.zig");
 
 extern "kernel32" fn SetConsoleOutputCP(wCodePageID: std.os.windows.UINT) callconv(.winapi) std.os.windows.BOOL;
 
@@ -28,6 +29,8 @@ pub fn main(init: std.process.Init) !void {
     var stdout_file = std.Io.File.stdout();
     var stdout_writer = stdout_file.writer(io, &stdout_buf);
     const stdout = &stdout_writer.interface;
+
+    try banner.render(stdout);
 
     var first_prompt = true;
     var skip_spacing = false;
