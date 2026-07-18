@@ -2,6 +2,7 @@ const std = @import("std");
 const builtin = @import("builtin");
 const builtins = @import("builtins/mod.zig");
 const tokenizer = @import("tokenizer.zig");
+const output = @import("output.zig");
 
 extern "kernel32" fn SetConsoleOutputCP(wCodePageID: std.os.windows.UINT) callconv(.winapi) std.os.windows.BOOL;
 
@@ -63,8 +64,7 @@ pub fn main(init: std.process.Init) !void {
         if (clean_line.len == 0) continue;
 
         const argv = tokenizer.tokenize(gpa, clean_line) catch |err| {
-            try stdout.print("parse error: {s}\n", .{@errorName(err)});
-            try stdout.flush();
+            try output.printError(stdout, "owlsh", "parse error: {s}", .{@errorName(err)});
             continue;
         };
         defer {
@@ -87,8 +87,7 @@ pub fn main(init: std.process.Init) !void {
         var proc = std.process.spawn(io, .{
             .argv = argv,
         }) catch |err| {
-            try stdout.print("{s}: {s}\n", .{ cmd, @errorName(err) });
-            try stdout.flush();
+            try output.printError(stdout, cmd, "{s}", .{@errorName(err)});
             continue;
         };
 

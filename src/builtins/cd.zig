@@ -1,4 +1,5 @@
 const std = @import("std");
+const output = @import("../output.zig");
 
 pub const DirHistory = struct {
     buf: [std.Io.Dir.max_path_bytes]u8 = undefined,
@@ -20,20 +21,17 @@ pub fn run(io: std.Io, argv: []const []const u8, stdout: *std.Io.Writer, home: ?
 
     if (std.mem.eql(u8, target, "~")) {
         target = home orelse {
-            try stdout.print("cd: ~: HOME not set\n", .{});
-            try stdout.flush();
+            try output.printError(stdout, "cd", "~: HOME not set", .{});
             return;
         };
     } else if (std.mem.eql(u8, target, "-")) {
         target = prev.get() orelse {
-            try stdout.print("cd: -: no previous directory\n", .{});
-            try stdout.flush();
+            try output.printError(stdout, "cd", "-: no previous directory", .{});
             return;
         };
     } else if (std.mem.startsWith(u8, target, "~\\") or std.mem.startsWith(u8, target, "~/")) {
         const h = home orelse {
-            try stdout.print("cd: ~: HOME not set\n", .{});
-            try stdout.flush();
+            try output.printError(stdout, "cd", "~: HOME not set", .{});
             return;
         };
         target = try std.fmt.bufPrint(&expanded_buf, "{s}{s}", .{ h, target[1..] });
@@ -44,15 +42,13 @@ pub fn run(io: std.Io, argv: []const []const u8, stdout: *std.Io.Writer, home: ?
     const cwd = cwd_buf[0..cwd_len];
 
     var dir = std.Io.Dir.cwd().openDir(io, target, .{}) catch |err| {
-        try stdout.print("cd: {s}: {s}\n", .{ target, @errorName(err) });
-        try stdout.flush();
+        try output.printError(stdout, "cd", "{s}: {s}", .{ target, @errorName(err) });
         return;
     };
     defer dir.close(io);
 
     std.process.setCurrentDir(io, dir) catch |err| {
-        try stdout.print("cd: {s}: {s}\n", .{ target, @errorName(err) });
-        try stdout.flush();
+        try output.printError(stdout, "cd", "{s}: {s}", .{ target, @errorName(err) });
         return;
     };
 
