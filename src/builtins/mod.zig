@@ -4,6 +4,7 @@ const exit = @import("exit.zig");
 const clear = @import("clear.zig");
 const pwd = @import("pwd.zig");
 const echo = @import("echo.zig");
+const help = @import("help.zig");
 
 pub const CommandType = enum {
     not_builtin,
@@ -32,6 +33,10 @@ pub fn dispatch(cmd: []const u8, argv: []const []const u8, io: std.Io, stdout: *
     }
     if (std.mem.eql(u8, cmd, "echo")) {
         try echo.run(io, argv, stdout);
+        return .handled;
+    }
+    if (std.mem.eql(u8, cmd, "help")) {
+        try help.run(stdout);
         return .handled;
     }
     return .not_builtin;
