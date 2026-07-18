@@ -74,7 +74,7 @@ pub fn main(init: std.process.Init) !void {
         if (argv.len == 0) continue;
         const cmd = argv[0];
 
-        switch (try builtins.dispatch(cmd, argv, io, stdout)) {
+        switch (try builtins.dispatch(cmd, argv, io, stdout, home)) {
             .exit_shell => break,
             .handled => {
                 if (std.mem.eql(u8, cmd, "clear")) skip_spacing = true;

@@ -16,13 +16,14 @@ pub fn dispatch(
     argv: []const []const u8,
     io: std.Io,
     stdout: *std.Io.Writer,
+    home: ?[]const u8,
 ) !CommandType {
     if (std.mem.eql(u8, cmd, "exit")) {
         exit.run();
         return .exit_shell;
     }
     if (std.mem.eql(u8, cmd, "cd")) {
-        try cd.run(io, argv, stdout);
+        try cd.run(io, argv, stdout, home);
         return .handled;
     }
     if (std.mem.eql(u8, cmd, "clear")) {
