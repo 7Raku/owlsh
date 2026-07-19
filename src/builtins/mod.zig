@@ -74,7 +74,7 @@ pub fn dispatch(
         return .handled;
     }
     if (std.mem.eql(u8, cmd, "ls")) {
-        try ls.run(io, argv, stdout);
+        try ls.run(io, gpa, argv, stdout);
         return .handled;
     }
     return .not_builtin;
