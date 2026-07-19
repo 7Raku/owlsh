@@ -69,7 +69,7 @@ pub fn dispatch(
         return .handled;
     }
     if (std.mem.eql(u8, cmd, "unalias")) {
-        try unalias.run(gpa, argv, aliases);
+        try unalias.run(gpa, argv, stdout, aliases);
         return .handled;
     }
     return .not_builtin;
