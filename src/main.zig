@@ -95,6 +95,8 @@ pub fn main(init: std.process.Init) !void {
             @memcpy(combined[expansion_tokens.len..], argv[1..]);
             combined_argv = combined;
 
+            if (combined.len == 0) continue;
+
             effective_argv = combined;
             cmd = combined[0];
         }
