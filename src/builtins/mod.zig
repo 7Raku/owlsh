@@ -10,6 +10,7 @@ const unset = @import("unset.zig");
 const alias = @import("alias.zig");
 const unalias = @import("unalias.zig");
 const ls = @import("ls.zig");
+const version = @import("version.zig");
 
 pub const CommandType = enum {
     not_builtin,
@@ -75,6 +76,10 @@ pub fn dispatch(
     }
     if (std.mem.eql(u8, cmd, "ls")) {
         try ls.run(io, gpa, argv, stdout);
+        return .handled;
+    }
+    if (std.mem.eql(u8, cmd, "version")) {
+        try version.run(stdout);
         return .handled;
     }
     return .not_builtin;
