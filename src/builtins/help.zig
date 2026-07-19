@@ -3,7 +3,7 @@ const std = @import("std");
 pub fn run(stdout: *std.Io.Writer) !void {
     try stdout.print(
         \\owlsh builtins:
-        \\  alias    create a command shortcut (NAME=VALUE)
+        \\  alias    create a command shortcut (NAME=VALUE), or list all if no args
         \\  cd       change directory (~, ~\path, -, no arg = home)
         \\  clear    clear the terminal screen (alias: cls)
         \\  echo     print arguments
