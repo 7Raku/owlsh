@@ -26,8 +26,8 @@ owlsh is a minimal, fast shell for Windows, built from scratch in Zig. It's desi
     - [x] `clear`
     - [x] `pwd`
     - [x] `echo`
-    - [ ] `export`
-    - [ ] `set`, `unset`
+    - [x] `export`
+    - [x] `set`, `unset`
     - [ ] `alias`, `unalias`
     - [ ] `history`
     - [ ] `source`
