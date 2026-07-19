@@ -19,6 +19,7 @@ pub fn main(init: std.process.Init) !void {
     const username = init.environ_map.get("USERNAME") orelse "user";
     const hostname = init.environ_map.get("COMPUTERNAME") orelse "host";
     var prev_dir: builtins.DirHistory = .{};
+    var last_exit_code: u8 = 0;
 
     var aliases: std.StringHashMap([]const u8) = .init(gpa);
     defer {
@@ -53,7 +54,7 @@ pub fn main(init: std.process.Init) !void {
         }
         skip_spacing = false;
 
-        try prompt.render(io, stdout, username, hostname, home);
+        try prompt.render(io, stdout, username, hostname, home, last_exit_code);
 
         const bare_line = try stdin.takeDelimiter('\n');
         const line = bare_line orelse break;
@@ -104,6 +105,7 @@ pub fn main(init: std.process.Init) !void {
         switch (try builtins.dispatch(cmd, effective_argv, io, gpa, stdout, home, &prev_dir, init.environ_map, &aliases)) {
             .exit_shell => break,
             .handled => {
+                last_exit_code = 0;
                 if (std.mem.eql(u8, cmd, "clear")) skip_spacing = true;
                 continue;
             },
@@ -115,18 +117,20 @@ pub fn main(init: std.process.Init) !void {
             .environ_map = init.environ_map,
         }) catch |err| {
             try output.printError(stdout, cmd, "{s}", .{@errorName(err)});
+            last_exit_code = 1;
             continue;
         };
 
         const term = try proc.wait(io);
         switch (term) {
             .exited => |code| {
+                last_exit_code = code;
                 if (code != 0) {
                     try stdout.print("[exit code {d}]\n", .{code});
                     try stdout.flush();
                 }
             },
-            else => {},
+            else => last_exit_code = 1,
         }
     }
 }
