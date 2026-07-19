@@ -1,5 +1,5 @@
 const std = @import("std");
-const output = @import("../ui/output.zig");
+const output = @import("../../ui/output.zig");
 
 pub fn run(io: std.Io, gpa: std.mem.Allocator, argv: []const []const u8, stdout: *std.Io.Writer) !void {
     const path = if (argv.len < 2) "." else argv[1];

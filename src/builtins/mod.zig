@@ -1,15 +1,15 @@
 const std = @import("std");
-const cd = @import("cd.zig");
+const cd = @import("fs/cd.zig");
 const clear = @import("clear.zig");
-const pwd = @import("pwd.zig");
+const pwd = @import("fs/pwd.zig");
 const echo = @import("echo.zig");
 const help = @import("help.zig");
-const export_cmd = @import("export.zig");
-const env_cmd = @import("env.zig");
-const unset = @import("unset.zig");
-const alias = @import("alias.zig");
-const unalias = @import("unalias.zig");
-const ls = @import("ls.zig");
+const export_cmd = @import("env/export.zig");
+const env_cmd = @import("env/env.zig");
+const unset = @import("env/unset.zig");
+const alias = @import("env/alias.zig");
+const unalias = @import("env/unalias.zig");
+const ls = @import("fs/ls.zig");
 const version = @import("version.zig");
 
 pub const CommandType = enum {
