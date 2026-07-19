@@ -1,5 +1,5 @@
 const std = @import("std");
-const output = @import("../output.zig");
+const output = @import("../ui/output.zig");
 
 pub const DirHistory = struct {
     buf: [std.Io.Dir.max_path_bytes]u8 = undefined,

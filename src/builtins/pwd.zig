@@ -1,5 +1,5 @@
 const std = @import("std");
-const output = @import("../output.zig");
+const output = @import("../ui/output.zig");
 
 pub fn run(io: std.Io, stdout: *std.Io.Writer) !void {
     var buf: [std.Io.Dir.max_path_bytes]u8 = undefined;

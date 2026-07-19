@@ -2,9 +2,9 @@ const std = @import("std");
 const builtin = @import("builtin");
 const builtins = @import("builtins/mod.zig");
 const tokenizer = @import("tokenizer.zig");
-const output = @import("output.zig");
-const prompt = @import("prompt.zig");
-const banner = @import("banner.zig");
+const output = @import("ui/output.zig");
+const prompt = @import("ui/prompt.zig");
+const banner = @import("ui/banner.zig");
 
 extern "kernel32" fn SetConsoleOutputCP(wCodePageID: std.os.windows.UINT) callconv(.winapi) std.os.windows.BOOL;
 

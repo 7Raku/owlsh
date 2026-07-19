@@ -1,5 +1,5 @@
 const std = @import("std");
-const output = @import("../output.zig");
+const output = @import("../ui/output.zig");
 
 pub fn run(gpa: std.mem.Allocator, argv: []const []const u8, stdout: *std.Io.Writer, aliases: *std.StringHashMap([]const u8)) !void {
     if (argv.len < 2) {
