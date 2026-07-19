@@ -7,6 +7,8 @@ const help = @import("help.zig");
 const export_cmd = @import("export.zig");
 const set = @import("set.zig");
 const unset = @import("unset.zig");
+const alias = @import("alias.zig");
+const unalias = @import("unalias.zig");
 
 pub const CommandType = enum {
     not_builtin,
@@ -16,7 +18,17 @@ pub const CommandType = enum {
 
 pub const DirHistory = cd.DirHistory;
 
-pub fn dispatch(cmd: []const u8, argv: []const []const u8, io: std.Io, stdout: *std.Io.Writer, home: ?[]const u8, prev_dir: *DirHistory, env: *std.process.Environ.Map) !CommandType {
+pub fn dispatch(
+    cmd: []const u8,
+    argv: []const []const u8,
+    io: std.Io,
+    gpa: std.mem.Allocator,
+    stdout: *std.Io.Writer,
+    home: ?[]const u8,
+    prev_dir: *DirHistory,
+    env: *std.process.Environ.Map,
+    aliases: *std.StringHashMap([]const u8),
+) !CommandType {
     if (std.mem.eql(u8, cmd, "exit")) {
         return .exit_shell;
     }
@@ -50,6 +62,14 @@ pub fn dispatch(cmd: []const u8, argv: []const []const u8, io: std.Io, stdout: *
     }
     if (std.mem.eql(u8, cmd, "unset")) {
         try unset.run(argv, stdout, env);
+        return .handled;
+    }
+    if (std.mem.eql(u8, cmd, "alias")) {
+        try alias.run(gpa, argv, stdout, aliases);
+        return .handled;
+    }
+    if (std.mem.eql(u8, cmd, "unalias")) {
+        try unalias.run(gpa, argv, aliases);
         return .handled;
     }
     return .not_builtin;

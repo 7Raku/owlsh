@@ -20,6 +20,16 @@ pub fn main(init: std.process.Init) !void {
     const hostname = init.environ_map.get("COMPUTERNAME") orelse "host";
     var prev_dir: builtins.DirHistory = .{};
 
+    var aliases: std.StringHashMap([]const u8) = .init(gpa);
+    defer {
+        var it = aliases.iterator();
+        while (it.next()) |entry| {
+            gpa.free(entry.key_ptr.*);
+            gpa.free(entry.value_ptr.*);
+        }
+        aliases.deinit();
+    }
+
     var stdin_buf: [1024]u8 = undefined;
     var stdin_file = std.Io.File.stdin();
     var stdin_reader = stdin_file.reader(io, &stdin_buf);
@@ -61,9 +71,35 @@ pub fn main(init: std.process.Init) !void {
         }
 
         if (argv.len == 0) continue;
-        const cmd = argv[0];
+        var effective_argv = argv;
+        var cmd = argv[0];
 
-        switch (try builtins.dispatch(cmd, argv, io, stdout, home, &prev_dir, init.environ_map)) {
+        var alias_tokens: ?[][]const u8 = null;
+        defer if (alias_tokens) |toks| {
+            for (toks) |t| gpa.free(t);
+            gpa.free(toks);
+        };
+
+        var combined_argv: ?[][]const u8 = null;
+        defer if (combined_argv) |ca| gpa.free(ca);
+
+        if (aliases.get(cmd)) |expansion| {
+            const expansion_tokens = tokenizer.tokenize(gpa, expansion) catch |err| {
+                try output.printError(stdout, "owlsh", "alias parse error: {s}", .{@errorName(err)});
+                continue;
+            };
+            alias_tokens = expansion_tokens;
+
+            const combined = try gpa.alloc([]const u8, expansion_tokens.len + (argv.len - 1));
+            @memcpy(combined[0..expansion_tokens.len], expansion_tokens);
+            @memcpy(combined[expansion_tokens.len..], argv[1..]);
+            combined_argv = combined;
+
+            effective_argv = combined;
+            cmd = combined[0];
+        }
+
+        switch (try builtins.dispatch(cmd, effective_argv, io, gpa, stdout, home, &prev_dir, init.environ_map, &aliases)) {
             .exit_shell => break,
             .handled => {
                 if (std.mem.eql(u8, cmd, "clear")) skip_spacing = true;
@@ -73,7 +109,7 @@ pub fn main(init: std.process.Init) !void {
         }
 
         var proc = std.process.spawn(io, .{
-            .argv = argv,
+            .argv = effective_argv,
             .environ_map = init.environ_map,
         }) catch |err| {
             try output.printError(stdout, cmd, "{s}", .{@errorName(err)});
