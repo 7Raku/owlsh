@@ -17,8 +17,16 @@ owlsh is a minimal, fast shell for Windows, built from scratch in Zig. It's desi
 ## Roadmap
 
 - [ ] Builtins:
+    - [ ] `ls`
+    - [ ] `cat`
+    - [ ] `cp`
+    - [ ] `mv`
+    - [ ] `rm`
+    - [ ] `mkdir`
+    - [ ] `rmdir`
     - [ ] `history`
     - [ ] `source`
+    - [ ] `which`
 - [ ] Piping/Redirects
 - [ ] .owlshrc-support (config-file)
 
