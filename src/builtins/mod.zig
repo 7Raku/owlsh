@@ -37,7 +37,7 @@ pub fn dispatch(
         try cd.run(io, argv, stdout, home, prev_dir);
         return .handled;
     }
-    if (std.mem.eql(u8, cmd, "clear")) {
+    if (std.mem.eql(u8, cmd, "clear") or std.mem.eql(u8, cmd, "cls")) {
         try clear.run(stdout);
         return .handled;
     }

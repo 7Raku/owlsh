@@ -106,7 +106,7 @@ pub fn main(init: std.process.Init) !void {
             .exit_shell => break,
             .handled => {
                 last_exit_code = 0;
-                if (std.mem.eql(u8, cmd, "clear")) skip_spacing = true;
+                if (std.mem.eql(u8, cmd, "clear") or std.mem.eql(u8, cmd, "cls")) skip_spacing = true;
                 continue;
             },
             .not_builtin => {},
