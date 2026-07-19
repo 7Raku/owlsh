@@ -35,7 +35,7 @@ pub fn dispatch(cmd: []const u8, argv: []const []const u8, io: std.Io, stdout: *
         return .handled;
     }
     if (std.mem.eql(u8, cmd, "echo")) {
-        try echo.run(io, argv, stdout);
+        try echo.run(argv, stdout);
         return .handled;
     }
     if (std.mem.eql(u8, cmd, "help")) {
@@ -43,7 +43,7 @@ pub fn dispatch(cmd: []const u8, argv: []const []const u8, io: std.Io, stdout: *
         return .handled;
     }
     if (std.mem.eql(u8, cmd, "export")) {
-        try export_cmd.run(io, argv, stdout, env);
+        try export_cmd.run(argv, stdout, env);
         return .handled;
     }
     if (std.mem.eql(u8, cmd, "set")) {
