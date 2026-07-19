@@ -5,7 +5,7 @@ pub fn run(stdout: *std.Io.Writer) !void {
         \\owlsh builtins:
         \\  alias    create a command shortcut (NAME=VALUE)
         \\  cd       change directory (~, ~\path, -, no arg = home)
-        \\  clear    clear the terminal screen
+        \\  clear    clear the terminal screen (alias: cls)
         \\  echo     print arguments
         \\  env      list all environment variables
         \\  exit     exit the shell
