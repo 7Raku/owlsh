@@ -1,6 +1,5 @@
 const std = @import("std");
 const cd = @import("cd.zig");
-const exit = @import("exit.zig");
 const clear = @import("clear.zig");
 const pwd = @import("pwd.zig");
 const echo = @import("echo.zig");
@@ -19,7 +18,6 @@ pub const DirHistory = cd.DirHistory;
 
 pub fn dispatch(cmd: []const u8, argv: []const []const u8, io: std.Io, stdout: *std.Io.Writer, home: ?[]const u8, prev_dir: *DirHistory, env: *std.process.Environ.Map) !CommandType {
     if (std.mem.eql(u8, cmd, "exit")) {
-        exit.run();
         return .exit_shell;
     }
     if (std.mem.eql(u8, cmd, "cd")) {
