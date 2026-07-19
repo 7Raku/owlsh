@@ -8,7 +8,10 @@ pub const QuoteState = enum {
 
 pub fn tokenize(gpa: std.mem.Allocator, line: []const u8) ![][]const u8 {
     var tokens: std.ArrayListUnmanaged([]const u8) = .empty;
-    errdefer tokens.deinit(gpa);
+    errdefer {
+        for (tokens.items) |token| gpa.free(token);
+        tokens.deinit(gpa);
+    }
 
     var current: std.ArrayListUnmanaged(u8) = .empty;
     errdefer current.deinit(gpa);
