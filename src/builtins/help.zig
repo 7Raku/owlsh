@@ -15,6 +15,7 @@ pub fn run(stdout: *std.Io.Writer) !void {
         \\  pwd      print the current working directory
         \\  unalias  remove a command shortcut
         \\  unset    remove an environment variable
+        \\  version  show the owlsh version
         \\
     , .{});
     try stdout.flush();
