@@ -5,7 +5,7 @@ const pwd = @import("pwd.zig");
 const echo = @import("echo.zig");
 const help = @import("help.zig");
 const export_cmd = @import("export.zig");
-const set = @import("set.zig");
+const env_cmd = @import("env.zig");
 const unset = @import("unset.zig");
 const alias = @import("alias.zig");
 const unalias = @import("unalias.zig");
@@ -56,8 +56,8 @@ pub fn dispatch(
         try export_cmd.run(argv, stdout, env);
         return .handled;
     }
-    if (std.mem.eql(u8, cmd, "set")) {
-        try set.run(stdout, env);
+    if (std.mem.eql(u8, cmd, "env")) {
+        try env_cmd.run(stdout, env);
         return .handled;
     }
     if (std.mem.eql(u8, cmd, "unset")) {

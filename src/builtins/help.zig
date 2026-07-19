@@ -7,11 +7,11 @@ pub fn run(stdout: *std.Io.Writer) !void {
         \\  cd       change directory (~, ~\path, -, no arg = home)
         \\  clear    clear the terminal screen
         \\  echo     print arguments
+        \\  env      list all environment variables
         \\  exit     exit the shell
         \\  export   set an environment variable (KEY=VALUE)
         \\  help     show this help message
         \\  pwd      print the current working directory
-        \\  set      list all environment variables
         \\  unalias  remove a command shortcut
         \\  unset    remove an environment variable
         \\
