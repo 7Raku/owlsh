@@ -3,7 +3,11 @@ const output = @import("../output.zig");
 
 pub fn run(gpa: std.mem.Allocator, argv: []const []const u8, stdout: *std.Io.Writer, aliases: *std.StringHashMap([]const u8)) !void {
     if (argv.len < 2) {
-        try output.printError(stdout, "alias", "missing NAME=VALUE argument", .{});
+        var it = aliases.iterator();
+        while (it.next()) |entry| {
+            try stdout.print("{s}={s}\n", .{ entry.key_ptr.*, entry.value_ptr.* });
+        }
+        try stdout.flush();
         return;
     }
 
