@@ -7,8 +7,11 @@ pub fn run(stdout: *std.Io.Writer) !void {
         \\  clear    clear the terminal screen
         \\  echo     print arguments
         \\  exit     exit the shell
+        \\  export   set an environment variable (KEY=VALUE)
         \\  help     show this help message
         \\  pwd      print the current working directory
+        \\  set      list all environment variables
+        \\  unset    remove an environment variable
         \\
     , .{});
     try stdout.flush();
