@@ -19,22 +19,20 @@ pub fn run(io: std.Io, argv: []const []const u8, stdout: *std.Io.Writer, home: ?
     var target: []const u8 = if (argv.len < 2) "~" else argv[1];
     var expanded_buf: [std.Io.Dir.max_path_bytes]u8 = undefined;
 
-    if (std.mem.eql(u8, target, "~")) {
-        target = home orelse {
+    if (std.mem.eql(u8, target, "~") or std.mem.startsWith(u8, target, "~\\") or std.mem.startsWith(u8, target, "~/")) {
+        const h = home orelse {
             try output.printError(stdout, "cd", "~: HOME not set", .{});
             return;
         };
+        target = if (std.mem.eql(u8, target, "~"))
+            h
+        else
+            try std.fmt.bufPrint(&expanded_buf, "{s}{s}", .{ h, target[1..] });
     } else if (std.mem.eql(u8, target, "-")) {
         target = prev.get() orelse {
             try output.printError(stdout, "cd", "-: no previous directory", .{});
             return;
         };
-    } else if (std.mem.startsWith(u8, target, "~\\") or std.mem.startsWith(u8, target, "~/")) {
-        const h = home orelse {
-            try output.printError(stdout, "cd", "~: HOME not set", .{});
-            return;
-        };
-        target = try std.fmt.bufPrint(&expanded_buf, "{s}{s}", .{ h, target[1..] });
     }
 
     var cwd_buf: [std.Io.Dir.max_path_bytes]u8 = undefined;
