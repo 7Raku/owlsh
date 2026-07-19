@@ -4,6 +4,10 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    const pkg_info = @import("build.zig.zon");
+    const options = b.addOptions();
+    options.addOption([]const u8, "version", pkg_info.version);
+
     const exe = b.addExecutable(.{
         .name = "owlsh",
         .root_module = b.createModule(.{
@@ -12,6 +16,7 @@ pub fn build(b: *std.Build) void {
             .optimize = optimize,
         }),
     });
+    exe.root_module.addOptions("build_options", options);
 
     b.installArtifact(exe);
 
