@@ -63,7 +63,7 @@ pub fn main(init: std.process.Init) !void {
         if (argv.len == 0) continue;
         const cmd = argv[0];
 
-        switch (try builtins.dispatch(cmd, argv, io, stdout, home, &prev_dir)) {
+        switch (try builtins.dispatch(cmd, argv, io, stdout, home, &prev_dir, init.environ_map)) {
             .exit_shell => break,
             .handled => {
                 if (std.mem.eql(u8, cmd, "clear")) skip_spacing = true;
@@ -74,6 +74,7 @@ pub fn main(init: std.process.Init) !void {
 
         var proc = std.process.spawn(io, .{
             .argv = argv,
+            .environ_map = init.environ_map,
         }) catch |err| {
             try output.printError(stdout, cmd, "{s}", .{@errorName(err)});
             continue;
