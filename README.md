@@ -16,22 +16,10 @@ owlsh is a minimal, fast shell for Windows, built from scratch in Zig. It's desi
 
 ## Roadmap
 
-- [x] Read-Eval-Print Loop
-- [x] Two-Line-Prompt (user@host + current directory, ~ for home)
-- [x] UTF-8-console output for Windows
-- [x] Quote-aware tokenizer
 - [ ] Builtins:
-    - [x] `exit`
-    - [x] `cd`
-    - [x] `clear`
-    - [x] `pwd`
-    - [x] `echo`
-    - [x] `export`
-    - [x] `set`, `unset`
     - [ ] `alias`, `unalias`
     - [ ] `history`
     - [ ] `source`
-- [x] Extern program-execution
 - [ ] Piping/Redirects
 - [ ] .owlshrc-support (config-file)
 
