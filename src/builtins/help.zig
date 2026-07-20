@@ -11,6 +11,7 @@ pub fn run(stdout: *std.Io.Writer) !void {
         \\  exit     exit the shell
         \\  export   set an environment variable (KEY=VALUE)
         \\  help     show this help message
+        \\  history  list commands entered this session
         \\  ls       list directory contents
         \\  pwd      print the current working directory
         \\  unalias  remove a command shortcut
