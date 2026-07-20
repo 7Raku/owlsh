@@ -4,6 +4,7 @@ pub fn run(stdout: *std.Io.Writer) !void {
     try stdout.print(
         \\owlsh builtins:
         \\  alias    create a command shortcut (NAME=VALUE), or list all if no args
+        \\  cat      print file contents
         \\  cd       change directory (~, ~\path, -, no arg = home)
         \\  clear    clear the terminal screen (alias: cls)
         \\  echo     print arguments
