@@ -23,7 +23,6 @@ owlsh is a minimal, fast shell for Windows, built from scratch in Zig. It's desi
     - [ ] `rm`
     - [ ] `mkdir`
     - [ ] `rmdir`
-    - [ ] `history`
     - [ ] `source`
     - [ ] `which`
 - [ ] Piping/Redirects
