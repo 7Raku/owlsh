@@ -12,6 +12,7 @@ const unalias = @import("env/unalias.zig");
 const ls = @import("fs/ls.zig");
 const version = @import("version.zig");
 const history_cmd = @import("history.zig");
+const cat = @import("fs/cat.zig");
 
 pub const CommandType = enum {
     not_builtin,
@@ -86,6 +87,10 @@ pub fn dispatch(
     }
     if (std.mem.eql(u8, cmd, "history")) {
         try history_cmd.run(stdout, history);
+        return .handled;
+    }
+    if (std.mem.eql(u8, cmd, "cat")) {
+        try cat.run(io, gpa, argv, stdout);
         return .handled;
     }
     return .not_builtin;
