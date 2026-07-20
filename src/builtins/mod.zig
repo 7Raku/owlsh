@@ -11,6 +11,7 @@ const alias = @import("env/alias.zig");
 const unalias = @import("env/unalias.zig");
 const ls = @import("fs/ls.zig");
 const version = @import("version.zig");
+const history_cmd = @import("history.zig");
 
 pub const CommandType = enum {
     not_builtin,
@@ -30,6 +31,7 @@ pub fn dispatch(
     prev_dir: *DirHistory,
     env: *std.process.Environ.Map,
     aliases: *std.StringHashMap([]const u8),
+    history: []const []const u8,
 ) !CommandType {
     if (std.mem.eql(u8, cmd, "exit")) {
         return .exit_shell;
@@ -80,6 +82,10 @@ pub fn dispatch(
     }
     if (std.mem.eql(u8, cmd, "version")) {
         try version.run(stdout);
+        return .handled;
+    }
+    if (std.mem.eql(u8, cmd, "history")) {
+        try history_cmd.run(stdout, history);
         return .handled;
     }
     return .not_builtin;

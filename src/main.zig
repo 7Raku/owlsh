@@ -31,6 +31,12 @@ pub fn main(init: std.process.Init) !void {
         aliases.deinit();
     }
 
+    var history: std.ArrayListUnmanaged([]const u8) = .empty;
+    defer {
+        for (history.items) |line| gpa.free(line);
+        history.deinit(gpa);
+    }
+
     var stdin_buf: [1024]u8 = undefined;
     var stdin_file = std.Io.File.stdin();
     var stdin_reader = stdin_file.reader(io, &stdin_buf);
@@ -61,6 +67,9 @@ pub fn main(init: std.process.Init) !void {
         const clean_line = std.mem.trim(u8, line, "\r");
 
         if (clean_line.len == 0) continue;
+
+        const line_copy = try gpa.dupe(u8, clean_line);
+        try history.append(gpa, line_copy);
 
         const argv = tokenizer.tokenize(gpa, clean_line) catch |err| {
             try output.printError(stdout, "owlsh", "parse error: {s}", .{@errorName(err)});
@@ -102,7 +111,7 @@ pub fn main(init: std.process.Init) !void {
             cmd = combined[0];
         }
 
-        switch (try builtins.dispatch(cmd, effective_argv, io, gpa, stdout, home, &prev_dir, init.environ_map, &aliases)) {
+        switch (try builtins.dispatch(cmd, effective_argv, io, gpa, stdout, home, &prev_dir, init.environ_map, &aliases, history.items)) {
             .exit_shell => break,
             .handled => {
                 last_exit_code = 0;
