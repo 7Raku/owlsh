@@ -1,21 +1,7 @@
 const std = @import("std");
 const output = @import("../../ui/output.zig");
 
-pub const DirHistory = struct {
-    buf: [std.Io.Dir.max_path_bytes]u8 = undefined,
-    len: usize = 0,
-
-    fn get(self: *const DirHistory) ?[]const u8 {
-        return if (self.len == 0) null else self.buf[0..self.len];
-    }
-
-    fn set(self: *DirHistory, path: []const u8) void {
-        @memcpy(self.buf[0..path.len], path);
-        self.len = path.len;
-    }
-};
-
-pub fn run(io: std.Io, argv: []const []const u8, stdout: *std.Io.Writer, home: ?[]const u8, prev: *DirHistory) !void {
+pub fn run(io: std.Io, argv: []const []const u8, stdout: *std.Io.Writer, home: ?[]const u8, env: *std.process.Environ.Map) !void {
     var target: []const u8 = if (argv.len < 2) "~" else argv[1];
     var expanded_buf: [std.Io.Dir.max_path_bytes]u8 = undefined;
 
@@ -29,7 +15,7 @@ pub fn run(io: std.Io, argv: []const []const u8, stdout: *std.Io.Writer, home: ?
         else
             try std.fmt.bufPrint(&expanded_buf, "{s}{s}", .{ h, target[1..] });
     } else if (std.mem.eql(u8, target, "-")) {
-        target = prev.get() orelse {
+        target = env.get("OLDPWD") orelse {
             try output.printError(stdout, "cd", "-: no previous directory", .{});
             return;
         };
@@ -50,5 +36,5 @@ pub fn run(io: std.Io, argv: []const []const u8, stdout: *std.Io.Writer, home: ?
         return;
     };
 
-    prev.set(cwd);
+    try env.put("OLDPWD", cwd);
 }

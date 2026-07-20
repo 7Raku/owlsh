@@ -20,8 +20,6 @@ pub const CommandType = enum {
     exit_shell,
 };
 
-pub const DirHistory = cd.DirHistory;
-
 pub fn dispatch(
     cmd: []const u8,
     argv: []const []const u8,
@@ -29,7 +27,6 @@ pub fn dispatch(
     gpa: std.mem.Allocator,
     stdout: *std.Io.Writer,
     home: ?[]const u8,
-    prev_dir: *DirHistory,
     env: *std.process.Environ.Map,
     aliases: *std.StringHashMap([]const u8),
     history: []const []const u8,
@@ -38,7 +35,7 @@ pub fn dispatch(
         return .exit_shell;
     }
     if (std.mem.eql(u8, cmd, "cd")) {
-        try cd.run(io, argv, stdout, home, prev_dir);
+        try cd.run(io, argv, stdout, home, env);
         return .handled;
     }
     if (std.mem.eql(u8, cmd, "clear") or std.mem.eql(u8, cmd, "cls")) {

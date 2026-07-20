@@ -18,7 +18,6 @@ pub fn main(init: std.process.Init) !void {
     const home = init.environ_map.get("USERPROFILE");
     const username = init.environ_map.get("USERNAME") orelse "user";
     const hostname = init.environ_map.get("COMPUTERNAME") orelse "host";
-    var prev_dir: builtins.DirHistory = .{};
     var last_exit_code: u8 = 0;
 
     var aliases: std.StringHashMap([]const u8) = .init(gpa);
@@ -111,7 +110,7 @@ pub fn main(init: std.process.Init) !void {
             cmd = combined[0];
         }
 
-        switch (try builtins.dispatch(cmd, effective_argv, io, gpa, stdout, home, &prev_dir, init.environ_map, &aliases, history.items)) {
+        switch (try builtins.dispatch(cmd, effective_argv, io, gpa, stdout, home, init.environ_map, &aliases, history.items)) {
             .exit_shell => break,
             .handled => {
                 last_exit_code = 0;
