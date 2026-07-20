@@ -20,6 +20,9 @@ pub fn main(init: std.process.Init) !void {
     const hostname = init.environ_map.get("COMPUTERNAME") orelse "host";
     var last_exit_code: u8 = 0;
 
+    var arena_state = std.heap.ArenaAllocator.init(gpa);
+    defer arena_state.deinit();
+
     var aliases: std.StringHashMap([]const u8) = .init(gpa);
     defer {
         var it = aliases.iterator();
@@ -52,6 +55,9 @@ pub fn main(init: std.process.Init) !void {
     var skip_spacing = false;
 
     while (true) {
+        _ = arena_state.reset(.retain_capacity);
+        const arena = arena_state.allocator();
+
         if (first_prompt) {
             first_prompt = false;
         } else if (!skip_spacing) {
@@ -70,39 +76,23 @@ pub fn main(init: std.process.Init) !void {
         const line_copy = try gpa.dupe(u8, clean_line);
         try history.append(gpa, line_copy);
 
-        const argv = tokenizer.tokenize(gpa, clean_line) catch |err| {
+        const argv = tokenizer.tokenize(arena, clean_line) catch |err| {
             try output.printError(stdout, "owlsh", "parse error: {s}", .{@errorName(err)});
             continue;
         };
-        defer {
-            for (argv) |token| gpa.free(token);
-            gpa.free(argv);
-        }
 
         if (argv.len == 0) continue;
         var effective_argv = argv;
         var cmd = argv[0];
 
-        var alias_tokens: ?[][]const u8 = null;
-        defer if (alias_tokens) |toks| {
-            for (toks) |t| gpa.free(t);
-            gpa.free(toks);
-        };
-
-        var combined_argv: ?[][]const u8 = null;
-        defer if (combined_argv) |ca| gpa.free(ca);
-
         if (aliases.get(cmd)) |expansion| {
-            const expansion_tokens = tokenizer.tokenize(gpa, expansion) catch |err| {
+            const expansion_tokens = tokenizer.tokenize(arena, expansion) catch |err| {
                 try output.printError(stdout, "owlsh", "alias parse error: {s}", .{@errorName(err)});
                 continue;
             };
-            alias_tokens = expansion_tokens;
-
-            const combined = try gpa.alloc([]const u8, expansion_tokens.len + (argv.len - 1));
+            const combined = try arena.alloc([]const u8, expansion_tokens.len + (argv.len - 1));
             @memcpy(combined[0..expansion_tokens.len], expansion_tokens);
             @memcpy(combined[expansion_tokens.len..], argv[1..]);
-            combined_argv = combined;
 
             if (combined.len == 0) continue;
 
